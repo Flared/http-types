@@ -1,6 +1,6 @@
 use futures_lite::{io, prelude::*};
 
-use std::convert::{Into, TryInto};
+use std::convert::Into;
 use std::fmt::Debug;
 use std::mem;
 use std::ops::Index;
@@ -55,12 +55,9 @@ impl Response {
     /// Create a new response.
     pub fn new<S>(status: S) -> Self
     where
-        S: TryInto<StatusCode>,
-        S::Error: Debug,
+        S: Into<StatusCode>,
     {
-        let status = status
-            .try_into()
-            .expect("Could not convert into a valid `StatusCode`");
+        let status = status.into();
         let (trailers_sender, trailers_receiver) = async_channel::bounded(1);
         let (upgrade_sender, upgrade_receiver) = async_channel::bounded(1);
         Self {
@@ -716,11 +713,6 @@ mod test {
     #[test]
     fn construct_shorthand_with_valid_status_code() {
         let _res = Response::new(200);
-    }
-
-    #[test]
-    #[should_panic(expected = "Could not convert into a valid `StatusCode`")]
-    fn construct_shorthand_with_invalid_status_code() {
-        let _res = Response::new(600);
+        let _res = Response::new(666);
     }
 }
