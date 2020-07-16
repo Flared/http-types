@@ -7,6 +7,12 @@ use std::fmt::{self, Display};
 #[repr(u16)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum StatusCode {
+    /// Invalid
+    ///
+    /// This code is set as a fallback when the response contains an unknown
+    /// status code.
+    Invalid = 0,
+
     /// 100 Continue
     ///
     /// This interim response indicates that everything so far is OK and that the client should
@@ -428,6 +434,7 @@ impl StatusCode {
     /// The canonical reason for a given status code
     pub fn canonical_reason(&self) -> &'static str {
         match self {
+            StatusCode::Invalid => "(invalid)",
             StatusCode::Continue => "Continue",
             StatusCode::SwitchingProtocols => "Switching Protocols",
             StatusCode::EarlyHints => "Early Hints",
@@ -496,70 +503,68 @@ impl From<StatusCode> for u16 {
     }
 }
 
-impl std::convert::TryFrom<u16> for StatusCode {
-    type Error = crate::Error;
-
-    fn try_from(num: u16) -> Result<Self, Self::Error> {
+impl std::convert::From<u16> for StatusCode {
+    fn from(num: u16) -> Self {
         match num {
-            100 => Ok(StatusCode::Continue),
-            101 => Ok(StatusCode::SwitchingProtocols),
-            103 => Ok(StatusCode::EarlyHints),
-            200 => Ok(StatusCode::Ok),
-            201 => Ok(StatusCode::Created),
-            202 => Ok(StatusCode::Accepted),
-            203 => Ok(StatusCode::NonAuthoritativeInformation),
-            204 => Ok(StatusCode::NoContent),
-            205 => Ok(StatusCode::ResetContent),
-            206 => Ok(StatusCode::PartialContent),
-            226 => Ok(StatusCode::ImUsed),
-            300 => Ok(StatusCode::MultipleChoice),
-            301 => Ok(StatusCode::MovedPermanently),
-            302 => Ok(StatusCode::Found),
-            303 => Ok(StatusCode::SeeOther),
-            304 => Ok(StatusCode::NotModified),
-            307 => Ok(StatusCode::TemporaryRedirect),
-            308 => Ok(StatusCode::PermanentRedirect),
-            400 => Ok(StatusCode::BadRequest),
-            401 => Ok(StatusCode::Unauthorized),
-            402 => Ok(StatusCode::PaymentRequired),
-            403 => Ok(StatusCode::Forbidden),
-            404 => Ok(StatusCode::NotFound),
-            405 => Ok(StatusCode::MethodNotAllowed),
-            406 => Ok(StatusCode::NotAcceptable),
-            407 => Ok(StatusCode::ProxyAuthenticationRequired),
-            408 => Ok(StatusCode::RequestTimeout),
-            409 => Ok(StatusCode::Conflict),
-            410 => Ok(StatusCode::Gone),
-            411 => Ok(StatusCode::LengthRequired),
-            412 => Ok(StatusCode::PreconditionFailed),
-            413 => Ok(StatusCode::PayloadTooLarge),
-            414 => Ok(StatusCode::UriTooLong),
-            415 => Ok(StatusCode::UnsupportedMediaType),
-            416 => Ok(StatusCode::RequestedRangeNotSatisfiable),
-            417 => Ok(StatusCode::ExpectationFailed),
-            418 => Ok(StatusCode::ImATeapot),
-            421 => Ok(StatusCode::MisdirectedRequest),
-            422 => Ok(StatusCode::UnprocessableEntity),
-            423 => Ok(StatusCode::Locked),
-            424 => Ok(StatusCode::FailedDependency),
-            425 => Ok(StatusCode::TooEarly),
-            426 => Ok(StatusCode::UpgradeRequired),
-            428 => Ok(StatusCode::PreconditionRequired),
-            429 => Ok(StatusCode::TooManyRequests),
-            431 => Ok(StatusCode::RequestHeaderFieldsTooLarge),
-            451 => Ok(StatusCode::UnavailableForLegalReasons),
-            500 => Ok(StatusCode::InternalServerError),
-            501 => Ok(StatusCode::NotImplemented),
-            502 => Ok(StatusCode::BadGateway),
-            503 => Ok(StatusCode::ServiceUnavailable),
-            504 => Ok(StatusCode::GatewayTimeout),
-            505 => Ok(StatusCode::HttpVersionNotSupported),
-            506 => Ok(StatusCode::VariantAlsoNegotiates),
-            507 => Ok(StatusCode::InsufficientStorage),
-            508 => Ok(StatusCode::LoopDetected),
-            510 => Ok(StatusCode::NotExtended),
-            511 => Ok(StatusCode::NetworkAuthenticationRequired),
-            _ => crate::bail!("Invalid status code"),
+            100 => StatusCode::Continue,
+            101 => StatusCode::SwitchingProtocols,
+            103 => StatusCode::EarlyHints,
+            200 => StatusCode::Ok,
+            201 => StatusCode::Created,
+            202 => StatusCode::Accepted,
+            203 => StatusCode::NonAuthoritativeInformation,
+            204 => StatusCode::NoContent,
+            205 => StatusCode::ResetContent,
+            206 => StatusCode::PartialContent,
+            226 => StatusCode::ImUsed,
+            300 => StatusCode::MultipleChoice,
+            301 => StatusCode::MovedPermanently,
+            302 => StatusCode::Found,
+            303 => StatusCode::SeeOther,
+            304 => StatusCode::NotModified,
+            307 => StatusCode::TemporaryRedirect,
+            308 => StatusCode::PermanentRedirect,
+            400 => StatusCode::BadRequest,
+            401 => StatusCode::Unauthorized,
+            402 => StatusCode::PaymentRequired,
+            403 => StatusCode::Forbidden,
+            404 => StatusCode::NotFound,
+            405 => StatusCode::MethodNotAllowed,
+            406 => StatusCode::NotAcceptable,
+            407 => StatusCode::ProxyAuthenticationRequired,
+            408 => StatusCode::RequestTimeout,
+            409 => StatusCode::Conflict,
+            410 => StatusCode::Gone,
+            411 => StatusCode::LengthRequired,
+            412 => StatusCode::PreconditionFailed,
+            413 => StatusCode::PayloadTooLarge,
+            414 => StatusCode::UriTooLong,
+            415 => StatusCode::UnsupportedMediaType,
+            416 => StatusCode::RequestedRangeNotSatisfiable,
+            417 => StatusCode::ExpectationFailed,
+            418 => StatusCode::ImATeapot,
+            421 => StatusCode::MisdirectedRequest,
+            422 => StatusCode::UnprocessableEntity,
+            423 => StatusCode::Locked,
+            424 => StatusCode::FailedDependency,
+            425 => StatusCode::TooEarly,
+            426 => StatusCode::UpgradeRequired,
+            428 => StatusCode::PreconditionRequired,
+            429 => StatusCode::TooManyRequests,
+            431 => StatusCode::RequestHeaderFieldsTooLarge,
+            451 => StatusCode::UnavailableForLegalReasons,
+            500 => StatusCode::InternalServerError,
+            501 => StatusCode::NotImplemented,
+            502 => StatusCode::BadGateway,
+            503 => StatusCode::ServiceUnavailable,
+            504 => StatusCode::GatewayTimeout,
+            505 => StatusCode::HttpVersionNotSupported,
+            506 => StatusCode::VariantAlsoNegotiates,
+            507 => StatusCode::InsufficientStorage,
+            508 => StatusCode::LoopDetected,
+            510 => StatusCode::NotExtended,
+            511 => StatusCode::NetworkAuthenticationRequired,
+            _ => StatusCode::Invalid,
         }
     }
 }

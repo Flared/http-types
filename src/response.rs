@@ -1,7 +1,7 @@
 use async_std::io::{self, BufRead, Read};
 use async_std::sync;
 
-use std::convert::{Into, TryInto};
+use std::convert::Into;
 use std::fmt::Debug;
 use std::mem;
 use std::ops::Index;
@@ -51,12 +51,9 @@ impl Response {
     /// Create a new response.
     pub fn new<S>(status: S) -> Self
     where
-        S: TryInto<StatusCode>,
-        S::Error: Debug,
+        S: Into<StatusCode>,
     {
-        let status = status
-            .try_into()
-            .expect("Could not convert into a valid `StatusCode`");
+        let status = status.into();
         let (sender, receiver) = sync::channel(1);
         Self {
             status,
@@ -251,10 +248,10 @@ impl Response {
     /// # use std::io::prelude::*;
     /// # fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     /// # async_std::task::block_on(async {
-    /// use http_types::{Body, Url, Method, Response, StatusCode};    
+    /// use http_types::{Body, Url, Method, Response, StatusCode};
     /// use async_std::io::Cursor;
     ///
-    /// let mut res = Response::new(StatusCode::Ok);    
+    /// let mut res = Response::new(StatusCode::Ok);
     /// let cursor = Cursor::new("Hello Nori");
     /// let body = Body::from_reader(cursor, None);
     /// res.set_body(body);
@@ -301,14 +298,14 @@ impl Response {
     ///
     /// ```
     /// # fn main() -> Result<(), http_types::Error> { async_std::task::block_on(async {
-    /// use http_types::{Body, Url, Method, Response, StatusCode};    
+    /// use http_types::{Body, Url, Method, Response, StatusCode};
     /// use http_types::convert::{Serialize, Deserialize};
     ///
     /// #[derive(Debug, Serialize, Deserialize)]
     /// struct Cat { name: String }
     ///
     /// let cat = Cat { name: String::from("chashu") };
-    /// let mut res = Response::new(StatusCode::Ok);    
+    /// let mut res = Response::new(StatusCode::Ok);
     /// res.set_body(Body::from_json(&cat)?);
     ///
     /// let cat: Cat = res.body_json().await?;
@@ -330,14 +327,14 @@ impl Response {
     ///
     /// ```
     /// # fn main() -> Result<(), http_types::Error> { async_std::task::block_on(async {
-    /// use http_types::{Body, Url, Method, Response, StatusCode};    
+    /// use http_types::{Body, Url, Method, Response, StatusCode};
     /// use http_types::convert::{Serialize, Deserialize};
     ///
     /// #[derive(Debug, Serialize, Deserialize)]
     /// struct Cat { name: String }
     ///
     /// let cat = Cat { name: String::from("chashu") };
-    /// let mut res = Response::new(StatusCode::Ok);    
+    /// let mut res = Response::new(StatusCode::Ok);
     /// res.set_body(Body::from_form(&cat)?);
     ///
     /// let cat: Cat = res.body_form().await?;
