@@ -1,7 +1,7 @@
 use async_std::io::{self, BufRead, Read};
 use async_std::sync;
 
-use std::convert::{Into, TryInto};
+use std::convert::Into;
 use std::fmt::Debug;
 use std::mem;
 use std::ops::Index;
@@ -93,12 +93,9 @@ impl Response {
     #[cfg(not(feature = "unstable"))]
     pub fn new<S>(status: S) -> Self
     where
-        S: TryInto<StatusCode>,
-        S::Error: Debug,
+        S: Into<StatusCode>,
     {
-        let status = status
-            .try_into()
-            .expect("Could not convert into a valid `StatusCode`");
+        let status = status.into();
         let (trailers_sender, trailers_receiver) = sync::channel(1);
         Self {
             status,
@@ -118,12 +115,10 @@ impl Response {
     #[cfg(feature = "unstable")]
     pub fn new<S>(status: S) -> Self
     where
-        S: TryInto<StatusCode>,
+        S: Into<StatusCode>,
         S::Error: Debug,
     {
-        let status = status
-            .try_into()
-            .expect("Could not convert into a valid `StatusCode`");
+        let status = status.into();
         let (trailers_sender, trailers_receiver) = sync::channel(1);
         let (upgrade_sender, upgrade_receiver) = sync::channel(1);
         Self {
@@ -789,11 +784,6 @@ mod test {
     #[test]
     fn construct_shorthand_with_valid_status_code() {
         let _res = Response::new(200);
-    }
-
-    #[test]
-    #[should_panic(expected = "Could not convert into a valid `StatusCode`")]
-    fn construct_shorthand_with_invalid_status_code() {
-        let _res = Response::new(600);
+        let _res = Response::new(666);
     }
 }
